@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tejas Ziman</title>
+
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        background: black;
+        font-family: Arial, sans-serif;
+    }
+
+    canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+
+    .text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: gold;
+        font-size: 3rem;
+        text-align: center;
+        font-weight: bold;
+        z-index: 2;
+        text-shadow: 0 0 20px red, 0 0 40px gold;
+        pointer-events: none;
+        transition: 0.5s ease;
+    }
+
+    @media (max-width: 600px) {
+        .text {
+            font-size: 2.2rem;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="text" id="message">🎉 Happy New Year 🎆</div>
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const message = document.getElementById("message");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+let particles = [];
+let clicks = 0;
+let ended = false;
+
+function randomColor() {
+    return `hsl(${Math.random() * 360}, 100%, 60%)`;
+}
+
+function createFirework(x, y) {
+    if (ended) return;
+
+    for (let i = 0; i < 80; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            angle: Math.random() * Math.PI * 2,
+            speed: Math.random() * 6 + 2,
+            radius: Math.random() * 3 + 1,
+            color: randomColor(),
+            life: 100
+        });
+    }
+}
+
+function animate() {
+    if (!ended) {
+        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    particles.forEach((p, i) => {
+        p.x += Math.cos(p.angle) * p.speed;
+        p.y += Math.sin(p.angle) * p.speed;
+        p.life--;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+
+        if (p.life <= 0) particles.splice(i, 1);
+    });
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+function handleClick(x, y) {
+    if (ended) return;
+
+    clicks++;
+    createFirework(x, y);
+
+    if (clicks >= 10) {
+        endScene();
+    }
+}
+
+function endScene() {
+    ended = true;
+    particles = [];
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    message.textContent = "✨ 2026 me toh duniya khatam he ✨";
+    message.style.color = "#ffffff";
+    message.style.textShadow = "0 0 20px #ffffff, 0 0 40px #00ffff";
+}
+
+// Mouse click
+canvas.addEventListener("click", e => {
+    handleClick(e.clientX, e.clientY);
+});
+
+// Touch (mobile)
+canvas.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    handleClick(t.clientX, t.clientY);
+});
+</script>
+
+</body>
+</html>
